@@ -142,6 +142,7 @@ public class IndicatorSeekBar extends View {
     private Bitmap mThumbBitmap;//the drawable bitmap for thumb
     private int mThumbColor;
     private int mThumbSize;
+    private int mThumbShadowRadius;
     private Drawable mThumbDrawable;
     private Bitmap mPressedThumbBitmap;//the bitmap for pressing status
     private int mPressedThumbColor;//the color for pressing status
@@ -216,6 +217,7 @@ public class IndicatorSeekBar extends View {
         mTrackRoundedCorners = ta.getBoolean(R.styleable.IndicatorSeekBar_isb_track_rounded_corners, builder.trackRoundedCorners);
         //thumb
         mThumbSize = ta.getDimensionPixelSize(R.styleable.IndicatorSeekBar_isb_thumb_size, builder.thumbSize);
+        mThumbShadowRadius = ta.getDimensionPixelSize(R.styleable.IndicatorSeekBar_isb_thumb_circle_shadow_radius, 8);
         mThumbDrawable = ta.getDrawable(R.styleable.IndicatorSeekBar_isb_thumb_drawable);
         mAdjustAuto = ta.getBoolean(R.styleable.IndicatorSeekBar_isb_thumb_adjust_auto, true);
         isCircleShadowEnabled = ta.getBoolean(R.styleable.IndicatorSeekBar_isb_thumb_circle_shadow_enabled, false);
@@ -639,7 +641,7 @@ public class IndicatorSeekBar extends View {
         if (isCircleShadowEnabled) {
             mThumbPaint.setColor(Color.GRAY);
             mThumbPaint.setMaskFilter(new BlurMaskFilter(
-                    14 /* shadowRadius */,
+                    mThumbShadowRadius /* shadowRadius */,
                     BlurMaskFilter.Blur.SOLID));
         }
 
