@@ -5,8 +5,13 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -56,6 +61,7 @@ public class IndicatorSeekBar extends View {
     private static final String FORMAT_TICK_TEXT = "${TICK_TEXT}";
     private Context mContext;
     private Paint mStockPaint;//the paint for seek bar drawing
+    private Paint mThumbPaint;//the paint for seek bar drawing
     private TextPaint mTextPaint;//the paint for mTickTextsArr drawing
     private OnSeekChangeListener mSeekChangeListener;
     private Rect mRect;
@@ -145,6 +151,7 @@ public class IndicatorSeekBar extends View {
     private int mThumbTextColor;
     private boolean mHideThumb;
     private boolean mAdjustAuto;
+    private boolean isCircleShadowEnabled;
 
     public IndicatorSeekBar(Context context) {
         this(context, null);
@@ -211,6 +218,7 @@ public class IndicatorSeekBar extends View {
         mThumbSize = ta.getDimensionPixelSize(R.styleable.IndicatorSeekBar_isb_thumb_size, builder.thumbSize);
         mThumbDrawable = ta.getDrawable(R.styleable.IndicatorSeekBar_isb_thumb_drawable);
         mAdjustAuto = ta.getBoolean(R.styleable.IndicatorSeekBar_isb_thumb_adjust_auto, true);
+        isCircleShadowEnabled = ta.getBoolean(R.styleable.IndicatorSeekBar_isb_thumb_circle_shadow_enabled, false);
         initThumbColor(ta.getColorStateList(R.styleable.IndicatorSeekBar_isb_thumb_color), builder.thumbColor);
         //thumb text
         mShowThumbText = ta.getBoolean(R.styleable.IndicatorSeekBar_isb_show_thumb_text, builder.showThumbText);
@@ -321,10 +329,15 @@ public class IndicatorSeekBar extends View {
         if (mStockPaint == null) {
             mStockPaint = new Paint();
         }
+        if (mThumbPaint == null) {
+            mThumbPaint = new Paint();
+        }
         if (mTrackRoundedCorners) {
             mStockPaint.setStrokeCap(Paint.Cap.ROUND);
+            mThumbPaint.setStrokeCap(Paint.Cap.ROUND);
         }
         mStockPaint.setAntiAlias(true);
+        mThumbPaint.setAntiAlias(true);
         if (mBackgroundTrackSize > mProgressTrackSize) {
             mProgressTrackSize = mBackgroundTrackSize;
         }
@@ -483,8 +496,11 @@ public class IndicatorSeekBar extends View {
             for (int i = 0; i < sectionSize; i++) {
                 if (mR2L) {
                     mStockPaint.setColor(mSectionTrackColorArray[sectionSize - i - 1]);
+                    mThumbPaint.setColor(mSectionTrackColorArray[sectionSize - i - 1]);
                 } else {
                     mStockPaint.setColor(mSectionTrackColorArray[i]);
+                    mStockPaint.setColor(mSectionTrackColorArray[i]);
+                    mThumbPaint.setColor(mSectionTrackColorArray[i]);
                 }
                 float thumbPosFloat = getThumbPosOnTickFloat();
                 if (i < thumbPosFloat && thumbPosFloat < (i + 1)) {
@@ -493,8 +509,10 @@ public class IndicatorSeekBar extends View {
                     // BGTrackSize for the right's.
                     float thumbCenterX = getThumbCenterX();
                     mStockPaint.setStrokeWidth(getLeftSideTrackSize());
+                    mThumbPaint.setStrokeWidth(getLeftSideTrackSize());
                     canvas.drawLine(mTickMarksX[i], mProgressTrack.top, thumbCenterX, mProgressTrack.bottom, mStockPaint);
                     mStockPaint.setStrokeWidth(getRightSideTrackSize());
+                    mThumbPaint.setStrokeWidth(getRightSideTrackSize());
                     canvas.drawLine(thumbCenterX, mProgressTrack.top, mTickMarksX[i + 1], mProgressTrack.bottom, mStockPaint);
                 } else {
                     if (i < thumbPosFloat) {
@@ -509,10 +527,14 @@ public class IndicatorSeekBar extends View {
             //draw progress track
             mStockPaint.setColor(mProgressTrackColor);
             mStockPaint.setStrokeWidth(mProgressTrackSize);
+            mThumbPaint.setColor(mProgressTrackColor);
+            mThumbPaint.setStrokeWidth(mProgressTrackSize);
             canvas.drawLine(mProgressTrack.left, mProgressTrack.top, mProgressTrack.right, mProgressTrack.bottom, mStockPaint);
             //draw BG track
             mStockPaint.setColor(mBackgroundTrackColor);
             mStockPaint.setStrokeWidth(mBackgroundTrackSize);
+            mThumbPaint.setColor(mBackgroundTrackColor);
+            mThumbPaint.setStrokeWidth(mBackgroundTrackSize);
             canvas.drawLine(mBackgroundTrack.left, mBackgroundTrack.top, mBackgroundTrack.right, mBackgroundTrack.bottom, mStockPaint);
         }
     }
@@ -607,11 +629,29 @@ public class IndicatorSeekBar extends View {
     }
 
     private void drawThumb(Canvas canvas) {
+
+//
+//        mThumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+//        mThumbPaint.setShadowLayer(24, 0, 0, Color.GRAY);
+//
+//        // Important for certain APIs
+//        setLayerType(LAYER_TYPE_SOFTWARE, mThumbPaint);
+        if (isCircleShadowEnabled) {
+            mThumbPaint.setColor(Color.GRAY);
+            mThumbPaint.setMaskFilter(new BlurMaskFilter(
+                    16 /* shadowRadius */,
+                    BlurMaskFilter.Blur.SOLID));
+        }
+
         if (mHideThumb) {
             return;
         }
         float thumbCenterX = getThumbCenterX();
-        if (mThumbDrawable != null) {//check user has set thumb drawable or not.ThumbDrawable first, thumb color for later.
+        if (mThumbDrawable != null) {//c
+            if(isCircleShadowEnabled)
+                canvas.drawCircle(thumbCenterX, mProgressTrack.top, mIsTouching ? mThumbTouchRadius*2 : mThumbRadius*2, mThumbPaint);
+
+            // heck user has set thumb drawable or not.ThumbDrawable first, thumb color for later.
             if (mThumbBitmap == null || mPressedThumbBitmap == null) {
                 initThumbBitmap();
             }
@@ -621,9 +661,9 @@ public class IndicatorSeekBar extends View {
             }
             mStockPaint.setAlpha(255);
             if (mIsTouching) {
-                canvas.drawBitmap(mPressedThumbBitmap, thumbCenterX - mPressedThumbBitmap.getWidth() / 2.0f, mProgressTrack.top - mPressedThumbBitmap.getHeight() / 2.0f, mStockPaint);
+                canvas.drawBitmap(mPressedThumbBitmap, thumbCenterX - mPressedThumbBitmap.getWidth() / 2.0f, mProgressTrack.top - mPressedThumbBitmap.getHeight() / 2.0f, mThumbPaint);
             } else {
-                canvas.drawBitmap(mThumbBitmap, thumbCenterX - mThumbBitmap.getWidth() / 2.0f, mProgressTrack.top - mThumbBitmap.getHeight() / 2.0f, mStockPaint);
+                canvas.drawBitmap(mThumbBitmap, thumbCenterX - mThumbBitmap.getWidth() / 2.0f, mProgressTrack.top - mThumbBitmap.getHeight() / 2.0f, mThumbPaint);
             }
         } else {
             if (mIsTouching) {
@@ -631,7 +671,8 @@ public class IndicatorSeekBar extends View {
             } else {
                 mStockPaint.setColor(mThumbColor);
             }
-            canvas.drawCircle(thumbCenterX, mProgressTrack.top, mIsTouching ? mThumbTouchRadius : mThumbRadius, mStockPaint);
+
+            canvas.drawCircle(thumbCenterX, mProgressTrack.top, mIsTouching ? mThumbTouchRadius : mThumbRadius, mThumbPaint);
         }
     }
 
@@ -1063,8 +1104,12 @@ public class IndicatorSeekBar extends View {
             }
         } else {
             mThumbBitmap = getDrawBitmap(mThumbDrawable, true);
+
+
             mPressedThumbBitmap = mThumbBitmap;
         }
+
+
     }
 
     /**
