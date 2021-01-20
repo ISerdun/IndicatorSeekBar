@@ -639,7 +639,7 @@ public class IndicatorSeekBar extends View {
         if (isCircleShadowEnabled) {
             mThumbPaint.setColor(Color.GRAY);
             mThumbPaint.setMaskFilter(new BlurMaskFilter(
-                    16 /* shadowRadius */,
+                    14 /* shadowRadius */,
                     BlurMaskFilter.Blur.SOLID));
         }
 
@@ -649,7 +649,7 @@ public class IndicatorSeekBar extends View {
         float thumbCenterX = getThumbCenterX();
         if (mThumbDrawable != null) {//c
             if(isCircleShadowEnabled)
-                canvas.drawCircle(thumbCenterX, mProgressTrack.top, mIsTouching ? mThumbTouchRadius*2 : mThumbRadius*2, mThumbPaint);
+                canvas.drawCircle(thumbCenterX, mProgressTrack.top, mIsTouching ? mThumbTouchRadius : mThumbRadius, mThumbPaint);
 
             // heck user has set thumb drawable or not.ThumbDrawable first, thumb color for later.
             if (mThumbBitmap == null || mPressedThumbBitmap == null) {
