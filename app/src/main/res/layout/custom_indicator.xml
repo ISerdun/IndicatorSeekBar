@@ -34,6 +34,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:isb_progress="75"
+            app:isb_thumb_circle_shadow_enabled="true"
             app:isb_show_indicator="rectangle"
             app:isb_show_tick_marks_type="divider"
             app:isb_ticks_count="6" />

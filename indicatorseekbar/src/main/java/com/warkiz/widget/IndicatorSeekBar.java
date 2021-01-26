@@ -488,8 +488,9 @@ public class IndicatorSeekBar extends View {
         drawTrack(canvas);
         drawTickMarks(canvas);
         drawTickTexts(canvas);
-        drawThumb(canvas);
         drawThumbText(canvas);
+        drawThumb(canvas);
+
     }
 
     private void drawTrack(Canvas canvas) {
@@ -631,18 +632,13 @@ public class IndicatorSeekBar extends View {
     }
 
     private void drawThumb(Canvas canvas) {
-
-//
-//        mThumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-//        mThumbPaint.setShadowLayer(24, 0, 0, Color.GRAY);
-//
-//        // Important for certain APIs
-//        setLayerType(LAYER_TYPE_SOFTWARE, mThumbPaint);
         if (isCircleShadowEnabled) {
-            mThumbPaint.setColor(Color.GRAY);
-            mThumbPaint.setMaskFilter(new BlurMaskFilter(
-                    mThumbShadowRadius /* shadowRadius */,
-                    BlurMaskFilter.Blur.SOLID));
+                mThumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                mThumbPaint.setShadowLayer(24, 0, 0, Color.GRAY);
+
+                // Important for certain APIs
+                setLayerType(LAYER_TYPE_SOFTWARE, mThumbPaint);
+
         }
 
         if (mHideThumb) {
@@ -650,8 +646,10 @@ public class IndicatorSeekBar extends View {
         }
         float thumbCenterX = getThumbCenterX();
         if (mThumbDrawable != null) {//c
-            if(isCircleShadowEnabled)
-                canvas.drawCircle(thumbCenterX, mProgressTrack.top, mIsTouching ? mThumbTouchRadius : mThumbRadius, mThumbPaint);
+            if (isCircleShadowEnabled) {
+                double radius=mIsTouching ? mThumbTouchRadius : mThumbRadius;
+                canvas.drawCircle(thumbCenterX, mProgressTrack.top, (float) (radius*0.9), mThumbPaint);
+            }
 
             // heck user has set thumb drawable or not.ThumbDrawable first, thumb color for later.
             if (mThumbBitmap == null || mPressedThumbBitmap == null) {
@@ -661,11 +659,12 @@ public class IndicatorSeekBar extends View {
                 //please check your selector drawable's format and correct.
                 throw new IllegalArgumentException("the format of the selector thumb drawable is wrong!");
             }
-            mStockPaint.setAlpha(255);
+            mThumbPaint.setAlpha(255);
             if (mIsTouching) {
-                canvas.drawBitmap(mPressedThumbBitmap, thumbCenterX - mPressedThumbBitmap.getWidth() / 2.0f, mProgressTrack.top - mPressedThumbBitmap.getHeight() / 2.0f, mThumbPaint);
+                canvas.drawBitmap(mPressedThumbBitmap, thumbCenterX - mPressedThumbBitmap.getWidth() / 2.0f, mProgressTrack.top - mPressedThumbBitmap.getHeight() / 2.0f, mStockPaint);
             } else {
-                canvas.drawBitmap(mThumbBitmap, thumbCenterX - mThumbBitmap.getWidth() / 2.0f, mProgressTrack.top - mThumbBitmap.getHeight() / 2.0f, mThumbPaint);
+
+                canvas.drawBitmap(mThumbBitmap, thumbCenterX - mThumbBitmap.getWidth() / 2.0f, mProgressTrack.top - mThumbBitmap.getHeight() / 2.0f, mStockPaint);
             }
         } else {
             if (mIsTouching) {
@@ -674,7 +673,7 @@ public class IndicatorSeekBar extends View {
                 mStockPaint.setColor(mThumbColor);
             }
 
-            canvas.drawCircle(thumbCenterX, mProgressTrack.top, mIsTouching ? mThumbTouchRadius : mThumbRadius, mThumbPaint);
+            canvas.drawCircle(thumbCenterX, mProgressTrack.top, mIsTouching ? mThumbTouchRadius : mThumbRadius, mStockPaint);
         }
     }
 
