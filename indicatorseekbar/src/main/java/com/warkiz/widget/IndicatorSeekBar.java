@@ -634,7 +634,7 @@ public class IndicatorSeekBar extends View {
     private void drawThumb(Canvas canvas) {
         if (isCircleShadowEnabled) {
                 mThumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                mThumbPaint.setShadowLayer(24, 0, 0, Color.GRAY);
+                mThumbPaint.setShadowLayer(mThumbRadius, 0, 0, Color.GRAY);
 
                 // Important for certain APIs
                 setLayerType(LAYER_TYPE_SOFTWARE, mThumbPaint);
