@@ -39,6 +39,9 @@
         <attr name="isb_thumb_color" format="color|reference" /><!--set thumb's color, default #FF4081-->
         <attr name="isb_thumb_drawable" format="reference" /><!--set custom thumb's drawable you want,thumb size will be limited in 30dp, if drawable less than 30dp ,will show in intrinsic size -->
         <attr name="isb_thumb_adjust_auto" format="boolean" /><!--set the thumb move to the closed tick after touched up, default true-->
+        <attr name="isb_step" format="integer" /><!--set the thumb move to the closed tick after touched up, default true-->
+        <attr name="isb_step_divider" format="integer" /><!--set the thumb move to the closed tick after touched up, default true-->
+        <attr name="isb_step_after_divider" format="integer" /><!--set the thumb move to the closed tick after touched up, default true-->
         <attr name="isb_thumb_circle_shadow_enabled" format="boolean" /><!--set the thumb move to the closed tick after touched up, default true-->
         <attr name="isb_thumb_circle_shadow_radius" format="dimension|reference" /><!--set the thumb move to the closed tick after touched up, default true-->
         //tickMarks

@@ -56,6 +56,10 @@ import java.math.BigDecimal;
  */
 
 public class IndicatorSeekBar extends View {
+    int stepProgress = 1;
+    int stepProgressDivider = -1;
+    int stepProgressAfterDivider = -1;
+
     private static final int THUMB_MAX_WIDTH = 30;
     private static final String FORMAT_PROGRESS = "${PROGRESS}";
     private static final String FORMAT_TICK_TEXT = "${TICK_TEXT}";
@@ -218,6 +222,9 @@ public class IndicatorSeekBar extends View {
         //thumb
         mThumbSize = ta.getDimensionPixelSize(R.styleable.IndicatorSeekBar_isb_thumb_size, builder.thumbSize);
         mThumbShadowRadius = ta.getDimensionPixelSize(R.styleable.IndicatorSeekBar_isb_thumb_circle_shadow_radius, 8);
+        stepProgress = ta.getInt(R.styleable.IndicatorSeekBar_isb_step, 1);
+        stepProgressDivider = ta.getInt(R.styleable.IndicatorSeekBar_isb_step_divider, -1);
+        stepProgressAfterDivider = ta.getInt(R.styleable.IndicatorSeekBar_isb_step_after_divider, -1);
         mThumbDrawable = ta.getDrawable(R.styleable.IndicatorSeekBar_isb_thumb_drawable);
         mAdjustAuto = ta.getBoolean(R.styleable.IndicatorSeekBar_isb_thumb_adjust_auto, true);
         isCircleShadowEnabled = ta.getBoolean(R.styleable.IndicatorSeekBar_isb_thumb_circle_shadow_enabled, false);
@@ -633,11 +640,11 @@ public class IndicatorSeekBar extends View {
 
     private void drawThumb(Canvas canvas) {
         if (isCircleShadowEnabled) {
-                mThumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                mThumbPaint.setShadowLayer(mThumbShadowRadius, 0, 0, Color.GRAY);
+            mThumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            mThumbPaint.setShadowLayer(mThumbShadowRadius, 0, 0, Color.GRAY);
 
-                // Important for certain APIs
-                setLayerType(LAYER_TYPE_SOFTWARE, mThumbPaint);
+            // Important for certain APIs
+            setLayerType(LAYER_TYPE_SOFTWARE, mThumbPaint);
 
         }
 
@@ -647,8 +654,8 @@ public class IndicatorSeekBar extends View {
         float thumbCenterX = getThumbCenterX();
         if (mThumbDrawable != null) {//c
             if (isCircleShadowEnabled) {
-                double radius=mIsTouching ? mThumbTouchRadius : mThumbRadius;
-                canvas.drawCircle(thumbCenterX, mProgressTrack.top, (float) (radius*0.9), mThumbPaint);
+                double radius = mIsTouching ? mThumbTouchRadius : mThumbRadius;
+                canvas.drawCircle(thumbCenterX, mProgressTrack.top, (float) (radius * 0.9), mThumbPaint);
             }
 
             // heck user has set thumb drawable or not.ThumbDrawable first, thumb color for later.
@@ -1314,7 +1321,20 @@ public class IndicatorSeekBar extends View {
     private float calculateProgress(float touchX) {
         lastProgress = mProgress;
         mProgress = mMin + (getAmplitude()) * (touchX - mPaddingLeft) / mSeekLength;
-        return mProgress;
+        return prepareStepProgress(mProgress);
+    }
+
+    int prepareStepProgress(float progress) {
+        if (stepProgressDivider == -1) {
+            return ((int) (progress / stepProgress)) * stepProgress;
+        } else {
+            if (progress > stepProgressDivider) {
+                return ((int) (progress / stepProgressAfterDivider)) * stepProgressAfterDivider;
+            } else {
+                return ((int) (progress / stepProgress)) * stepProgress;
+
+            }
+        }
     }
 
     private float calculateTouchX(float touchX) {
@@ -1593,7 +1613,7 @@ public class IndicatorSeekBar extends View {
         } else if (mIndicatorTextFormat != null && mIndicatorTextFormat.contains(FORMAT_PROGRESS)) {
             return mIndicatorTextFormat.replace(FORMAT_PROGRESS, getProgressString(mProgress));
         }
-        return getProgressString(mProgress);
+        return getProgressString(prepareStepProgress(mProgress));
     }
 
     /*------------------API START-------------------*/
